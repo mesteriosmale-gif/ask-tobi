@@ -19,6 +19,7 @@ export default function SupportPage() {
       </Link>
 
       <section className="support-content">
+        
         <p className="support-eyebrow">Human support · Always welcome</p>
         <h1 className="support-title">
           When the unexpected<br />

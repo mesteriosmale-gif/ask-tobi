@@ -2,14 +2,10 @@ import type { NextConfig } from 'next'
 import { fileURLToPath } from 'node:url'
 
 // Global polyfills for serverless environment & pdf-parse
-if (typeof global.DOMMatrix === 'undefined') {
-  ;(global as any).DOMMatrix = class DOMMatrix {}
-}
-if (typeof global.ImageData === 'undefined') {
-  ;(global as any).ImageData = class ImageData {}
-}
-if (typeof global.Path2D === 'undefined') {
-  ;(global as any).Path2D = class Path2D {}
+if (typeof globalThis !== 'undefined') {
+  ;(globalThis as any).DOMMatrix = (globalThis as any).DOMMatrix || class DOMMatrix {}
+  ;(globalThis as any).ImageData = (globalThis as any).ImageData || class ImageData {}
+  ;(globalThis as any).Path2D = (globalThis as any).Path2D || class Path2D {}
 }
 
 const nextConfig: NextConfig = {
@@ -22,6 +18,17 @@ const nextConfig: NextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'pdfjs-dist': false,
+        'canvas': false,
+        '@napi-rs/canvas': false,
+      }
+    }
+    return config
   },
 }
 
