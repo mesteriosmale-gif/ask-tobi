@@ -1,0 +1,37 @@
+{
+  "name": "liquid-sculpture-hero",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "oxlint app src next.config.ts",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@auth/mongodb-adapter": "^3.11.3",
+    "@google/genai": "^2.30.0",
+    "@google/generative-ai": "^0.24.1",
+    "@react-three/fiber": "^9.8.2",
+    "bcryptjs": "^3.0.3",
+    "framer-motion": "^14.5.0",
+    "jszip": "^3.10.2",
+    "mammoth": "^1.13.0",
+    "mongodb": "^6.21.0",
+    "mongoose": "^9.11.3",
+    "next": "^16.4.2",
+    "next-auth": "^5.0.0-beta.32",
+    "pdf-parse": "^2.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "oxlint": "^1.88.0",
+    "typescript": "~6.0.3"
+  }
+}
