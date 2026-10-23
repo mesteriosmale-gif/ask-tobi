@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
+import dynamic from 'next/dynamic'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
@@ -23,7 +23,7 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
     loader.setMeshoptDecoder(MeshoptDecoder)
   })
   const avatarRef = useRef<THREE.Group>(null)
-  const pointer = useThree((state) => state.pointer)
+  const pointer = useRef(new THREE.Vector2())
   const reaction = useRef({ kind: -1, startedAt: 0 })
   const headRef = useRef<THREE.Object3D | null>(null)
   const leftEyeRef = useRef<THREE.Object3D | null>(null)
@@ -31,6 +31,7 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
   const headBaseRef = useRef<THREE.Euler | null>(null)
   const leftEyeBaseRef = useRef<THREE.Euler | null>(null)
   const rightEyeBaseRef = useRef<THREE.Euler | null>(null)
+
   const rig = useMemo<AvatarRig>(() => {
     const scene = cloneSkinnedScene(gltf.scene)
     const character = scene.getObjectByName('char_grp') ?? scene
@@ -68,14 +69,16 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
 
   useEffect(() => {
     const trackPointer = (event: PointerEvent) => {
-      pointer.set(
-        (event.clientX / window.innerWidth) * 2 - 1,
-        -(event.clientY / window.innerHeight) * 2 + 1,
-      )
+      if (typeof window !== 'undefined') {
+        pointer.current.set(
+          (event.clientX / window.innerWidth) * 2 - 1,
+          -(event.clientY / window.innerHeight) * 2 + 1,
+        )
+      }
     }
     window.addEventListener('pointermove', trackPointer, { passive: true })
     return () => window.removeEventListener('pointermove', trackPointer)
-  }, [pointer])
+  }, [])
 
   useEffect(() => {
     if (reactionTick === 0) return
@@ -90,8 +93,8 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
     if (!avatar) return
 
     const time = state.clock.elapsedTime
-    const lookX = THREE.MathUtils.clamp(state.pointer.x, -1, 1)
-    const lookY = THREE.MathUtils.clamp(state.pointer.y, -1, 1)
+    const lookX = THREE.MathUtils.clamp(pointer.current.x, -1, 1)
+    const lookY = THREE.MathUtils.clamp(pointer.current.y, -1, 1)
     const motion = reaction.current
     const progress = motion.kind < 0 ? 1 : THREE.MathUtils.clamp((performance.now() * 0.001 - motion.startedAt) / 0.8, 0, 1)
     const envelope = motion.kind < 0 ? 0 : Math.sin(progress * Math.PI)
@@ -126,8 +129,6 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
       rightEye.rotation.y = rightEyeBase.y + lookX * 0.11
       rightEye.rotation.x = rightEyeBase.x - lookY * 0.09
     }
-
-
   })
 
   return (
@@ -137,7 +138,7 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
   )
 }
 
-export default function AnimeAvatar(props: AnimeAvatarProps) {
+function AnimeAvatarContent(props: AnimeAvatarProps) {
   return (
     <div className="assistant-avatar" aria-hidden="true">
       <Canvas
@@ -153,4 +154,12 @@ export default function AnimeAvatar(props: AnimeAvatarProps) {
       </Canvas>
     </div>
   )
+}
+
+const DynamicAnimeAvatar = dynamic(() => Promise.resolve(AnimeAvatarContent), {
+  ssr: false,
+})
+
+export default function AnimeAvatar(props: AnimeAvatarProps) {
+  return <DynamicAnimeAvatar {...props} />
 }
