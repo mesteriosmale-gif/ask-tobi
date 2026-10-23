@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import dynamic from 'next/dynamic'
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
@@ -138,7 +138,7 @@ function AvatarModel({ isLoading, reactionTick }: AnimeAvatarProps) {
   )
 }
 
-function AnimeAvatarContent(props: AnimeAvatarProps) {
+export default function AnimeAvatar(props: AnimeAvatarProps) {
   return (
     <div className="assistant-avatar" aria-hidden="true">
       <Canvas
@@ -154,12 +154,4 @@ function AnimeAvatarContent(props: AnimeAvatarProps) {
       </Canvas>
     </div>
   )
-}
-
-const DynamicAnimeAvatar = dynamic(() => Promise.resolve(AnimeAvatarContent), {
-  ssr: false,
-})
-
-export default function AnimeAvatar(props: AnimeAvatarProps) {
-  return <DynamicAnimeAvatar {...props} />
 }
